@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+import TheiaListener
+
 
 class TheiaInterface(ABC):
     """
@@ -7,10 +9,17 @@ class TheiaInterface(ABC):
     """
 
     @abstractmethod
-    def listen(self) -> str:
+    def light(self):
         """
-        Listen to Theia for client input.
-        :return: The client input.
+        Run Theia.
+        """
+        pass
+
+    @abstractmethod
+    def suscribe(self, listener: TheiaListener):
+        """
+        Set the view's listener.
+        :param listener: The new view's listener.
         """
         pass
 

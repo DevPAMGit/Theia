@@ -1,9 +1,11 @@
 from abc import ABC
+from typing import Optional
 
 import colorama
 from termcolor import colored
 
 from TheiaInterface import TheiaInterface
+from TheiaListener import TheiaListener
 from models.MessageType import MessageType
 
 
@@ -18,15 +20,42 @@ class Theia(TheiaInterface, ABC):
         """
         # Initializing the console color.
         colorama.init()
+        # Set the input start.
         self.__INPUT__: str = "> "
+        # Initialize the view's listener.
+        self.__listener__: Optional[TheiaListener] = None
 
-    def listen(self) -> str:
+    def suscribe(self, listener: TheiaListener):
         """
-        Listen to Theia for client input.
-        :return: The client input.
+        Set the view's listener.
+        :param listener: The new view's listener.
         """
-        self.classic(self.__INPUT__)
-        return input()
+        self.__listener__ = listener
+
+    def light(self):
+        """
+        Run Theia.
+        """
+        # Get the client first command.
+        client_input: str = self.__get_input__()
+
+        # While 'exit 'keyword
+        while client_input.__ne__("exit"):
+
+            if client_input.__ne__(""):
+                # If there is listener: notify him.
+                if self.__listener__ is not None:
+                    self.__listener__.notify(client_input)
+
+            client_input = self.__get_input__()
+
+        # 'exit' keyhword found': unsucribe the listener.
+        # If there is listener: unsuscribe him.
+        if self.__listener__ is not None:
+            self.__listener__.unsuscribe()
+
+        # Reset the listener.
+        self.__listener__ = None
 
     def error(self, message: str = "", line_to_erase: bool = False):
         """
@@ -67,6 +96,14 @@ class Theia(TheiaInterface, ABC):
         :param line_to_erase: Indicate if the line need to be removed.
         """
         self.__write__(MessageType.CLASSIC, message, line_to_erase)
+
+    def __get_input__(self) -> str:
+        """
+        Get the client input.
+        :return: The client input.
+        """
+        self.__write__(MessageType.CLASSIC, self.__INPUT__)
+        return input().strip()
 
     @staticmethod
     def __write__(message_type: MessageType, message: str, erase_previous_line: bool = False):
